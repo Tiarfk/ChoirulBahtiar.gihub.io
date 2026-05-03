@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tiar — Automation Engineer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #070d1a;
+      --surface:   #0d1526;
+      --surface2:  #111d35;
+      --cyan:      #00d4ff;
+      --cyan-dim:  rgba(0,212,255,0.12);
+      --orange:    #ff6b35;
+      --orange-dim:rgba(255,107,53,0.12);
+      --text:      #dde4f0;
+      --muted:     #5a6a88;
+      --border:    rgba(0,212,255,0.15);
+      --font-head: 'Orbitron', sans-serif;
+      --font-body: 'Exo 2', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 400;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 3px; }
+
+    /* ─── GRID BACKGROUND ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── NOISE OVERLAY ─── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    section, nav, footer { position: relative; z-index: 1; }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 4rem;
+      background: rgba(7,13,26,0.75);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.1em;
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--orange); }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--cyan); }
+
+    /* ─── HERO ─── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 0 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
+      top: -100px; right: -100px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .hero-glow-2 {
+      position: absolute;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(255,107,53,0.06) 0%, transparent 70%);
+      bottom: 100px; left: 200px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .hero-content { max-width: 720px; }
+    .hero-tag {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--orange);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.2s forwards;
+    }
+    .hero-name {
+      font-family: var(--font-head);
+      font-size: clamp(2.8rem, 6vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      color: #fff;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.4s forwards;
+    }
+    .hero-name .accent { color: var(--cyan); }
+    .hero-title {
+      font-family: var(--font-mono);
+      font-size: clamp(0.9rem, 2vw, 1.15rem);
+      color: var(--muted);
+      margin-top: 1rem;
+      height: 1.6em;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.6s forwards;
+    }
+    .cursor {
+      display: inline-block;
+      width: 2px; height: 1.1em;
+      background: var(--cyan);
+      margin-left: 3px;
+      vertical-align: middle;
+      animation: blink 0.9s step-end infinite;
+    }
+    .hero-desc {
+      margin-top: 1.8rem;
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.8;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.8s forwards;
+    }
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s 1s forwards;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      background: var(--cyan);
+      color: #070d1a;
+      font-family: var(--font-head);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.85; transform: translateY(-2px); }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      background: transparent;
+      color: var(--cyan);
+      font-family: var(--font-head);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--cyan); transform: translateY(-2px); }
+
+    /* ─── SECTION BASE ─── */
+    section { padding: 7rem 4rem; }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--orange);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+    }
+    .section-title {
+      font-family: var(--font-head);
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+    .section-divider {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), transparent);
+      margin-bottom: 3rem;
+    }
+
+    /* ─── ABOUT ─── */
+    #about { background: var(--surface); }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 5rem;
+      align-items: center;
+      max-width: 1100px;
+    }
+    .about-img-wrap {
+      position: relative;
+    }
+    .about-img-frame {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+    }
+    .about-img-frame::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--cyan-dim), transparent 50%, var(--orange-dim));
+    }
+    .about-img-placeholder {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 2;
+      z-index: 1;
+    }
+    .about-img-placeholder .icon {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .corner-accent {
+      position: absolute;
+      width: 40px; height: 40px;
+      border-color: var(--cyan);
+      border-style: solid;
+    }
+    .corner-accent.tl { top: -8px; left: -8px; border-width: 2px 0 0 2px; }
+    .corner-accent.br { bottom: -8px; right: -8px; border-width: 0 2px 2px 0; }
+    .about-text p { color: var(--muted); margin-bottom: 1rem; font-size: 1rem; }
+    .about-text p strong { color: var(--text); font-weight: 600; }
+    .about-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1.5rem;
+    }
+    .badge {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 0.35rem 0.85rem;
+      border: 1px solid var(--border);
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      background: var(--cyan-dim);
+    }
+
+    /* ─── SKILLS ─── */
+    #skills { }
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 1100px;
+    }
+    .skill-category {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      position: relative;
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+    }
+    .skill-category::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), transparent);
+    }
+    .skill-cat-title {
+      font-family: var(--font-head);
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      color: var(--cyan);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .skill-cat-title .cat-icon { font-size: 1rem; }
+    .skill-item { margin-bottom: 1.2rem; }
+    .skill-item:last-child { margin-bottom: 0; }
+    .skill-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.4rem;
+    }
+    .skill-name { font-size: 0.88rem; color: var(--text); font-weight: 500; }
+    .skill-pct {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--orange);
+    }
+    .skill-bar {
+      height: 4px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .skill-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), #0099bb);
+      border-radius: 2px;
+      width: 0;
+      transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .skill-fill.active { width: var(--w); }
+
+    /* ─── PROJECTS ─── */
+    #projects { background: var(--surface); }
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.8rem;
+      max-width: 1100px;
+    }
+    .project-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.3s, transform 0.3s;
+      clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
+    }
+    .project-card:hover {
+      border-color: var(--cyan);
+      transform: translateY(-4px);
+    }
+    .project-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--cyan-dim), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .project-card:hover::after { opacity: 1; }
+    .project-num {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--orange);
+      letter-spacing: 0.15em;
+      margin-bottom: 0.8rem;
+    }
+    .project-title {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.8rem;
+      line-height: 1.3;
+      letter-spacing: 0.04em;
+    }
+    .project-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+    .project-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .project-tag {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid rgba(0,212,255,0.2);
+      color: var(--cyan);
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── CONTACT ─── */
+    #contact { }
+    .contact-wrap {
+      max-width: 700px;
+    }
+    .contact-desc {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-bottom: 3rem;
+      line-height: 1.8;
+    }
+    .contact-links {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .contact-link {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 1.2rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.2s, transform 0.2s;
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+    }
+    .contact-link:hover {
+      border-color: var(--cyan);
+      transform: translateX(6px);
+    }
+    .contact-link-icon {
+      font-size: 1.3rem;
+      width: 1.5rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .contact-link-info { flex: 1; }
+    .contact-link-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--orange);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.15rem;
+    }
+    .contact-link-value {
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+    .contact-link-arrow {
+      font-family: var(--font-mono);
+      color: var(--muted);
+      font-size: 1rem;
+      transition: color 0.2s, transform 0.2s;
+    }
+    .contact-link:hover .contact-link-arrow {
+      color: var(--cyan);
+      transform: translateX(4px);
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+    }
+    footer .copy {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+    footer .copy span { color: var(--cyan); }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { gap: 1.5rem; }
+      section { padding: 5rem 1.5rem; }
+      #hero { padding: 8rem 1.5rem 4rem; }
+      .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .about-img-frame { max-width: 300px; }
+      footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; }
+    }
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .hero-cta { flex-direction: column; align-items: flex-start; }
+      .projects-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#hero" class="nav-logo">T<span>.</span>ARSY</a>
+    <ul class="nav-links">
+      <li><a href="#about">// tentang</a></li>
+      <li><a href="#skills">// keahlian</a></li>
+      <li><a href="#projects">// proyek</a></li>
+      <li><a href="#contact">// kontak</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-glow-2"></div>
+    <div class="hero-content">
+      <p class="hero-tag">// automation engineer — ITS Surabaya</p>
+      <h1 class="hero-name">Halo, saya<br><span class="accent">Tiar Arsy.</span></h1>
+      <p class="hero-title" id="typewriter"><span class="cursor"></span></p>
+      <p class="hero-desc">
+        Fresh graduate D4 Teknik Otomasi dari ITS Surabaya, berfokus pada 
+        <strong style="color:var(--text)">sistem kontrol industri, PLC, HMI/SCADA</strong>, 
+        dan <strong style="color:var(--text)">automation engineering</strong>.
+        Membangun solusi otomasi yang andal dan terukur.
+      </p>
+      <div class="hero-cta">
+        <a href="#projects" class="btn-primary">↓ LIHAT PROYEK</a>
+        <a href="#contact" class="btn-secondary">↗ HUBUNGI SAYA</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="about-grid">
+      <div class="about-img-wrap reveal">
+        <div class="about-img-frame">
+          <!-- Ganti dengan tag <img src="foto-kamu.jpg" style="width:100%;height:100%;object-fit:cover"> -->
+          <div class="about-img-placeholder">
+            <span class="icon">🖼️</span>
+            GANTI DENGAN<br>FOTO KAMU<br>
+            <span style="color:var(--cyan);font-size:0.65rem">img src="foto.jpg"</span>
+          </div>
+        </div>
+        <div class="corner-accent tl"></div>
+        <div class="corner-accent br"></div>
+      </div>
+      <div class="about-text">
+        <p class="section-label reveal">// 01 — tentang saya</p>
+        <h2 class="section-title reveal">Membangun sistem<br>yang <span style="color:var(--cyan)">bekerja sendiri.</span></h2>
+        <div class="section-divider reveal"></div>
+        <p class="reveal reveal-delay-1">
+          Saya adalah <strong>Automation Engineer</strong> fresh graduate dari program 
+          D4 Teknik Otomasi, Institut Teknologi Sepuluh Nopember (ITS) Surabaya — 
+          salah satu program otomasi industri terbaik di Indonesia.
+        </p>
+        <p class="reveal reveal-delay-2">
+          Passion saya ada di persimpangan antara <strong>hardware dan software</strong>: 
+          merancang sistem kontrol yang mengintegrasikan PLC, sensor, aktuator, dan 
+          tampilan HMI menjadi satu ekosistem otomasi yang handal.
+        </p>
+        <p class="reveal reveal-delay-3">
+          Saat ini sedang mempersiapkan diri untuk terjun ke industri, dengan fokus 
+          khusus pada <strong>advanced process control</strong> dan pengembangan 
+          capstone project sistem otomasi beverage plant terintegrasi.
+        </p>
+        <div class="about-badges reveal">
+          <span class="badge">TIA PORTAL</span>
+          <span class="badge">PLC PROGRAMMING</span>
+          <span class="badge">HMI / SCADA</span>
+          <span class="badge">PID CONTROL</span>
+          <span class="badge">PROFINET</span>
+          <span class="badge">MODBUS</span>
+          <span class="badge">FACTORY I/O</span>
+          <span class="badge">IGNITION</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <p class="section-label reveal">// 02 — keahlian</p>
+    <h2 class="section-title reveal">Toolbox <span style="color:var(--cyan)">teknikal.</span></h2>
+    <div class="section-divider reveal"></div>
+
+    <div class="skills-grid">
+
+      <div class="skill-category reveal">
+        <div class="skill-cat-title"><span class="cat-icon">⚙️</span> PLC & CONTROL</div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">TIA Portal (Siemens)</span><span class="skill-pct">75%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--w:75%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Ladder Logic / FBD</span><span class="skill-pct">70%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--w:70%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">PID Control Theory</span><span class="skill-pct">65%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--w:65%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">PLCSIM</span><span class="skill-pct">70%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--w:70%"></div></div>
+        </div>
+      </div>
+
+      <div class="skill-category reveal reveal-delay-1">
+        <div class="skill-cat-title"><span class="cat-icon">🖥️</span> HMI / SCADA</div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">WinCC (Siemens)</span><span class="skill-pct">60%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--w:60%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Ignition (Inductive Automation)</span><span class="skill-pct">45%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--w:45%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Factory I/O Simulation</span><span class="skill-pct">65%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--w:65%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">OPC-UA / Modbus</span><span class="skill-pct">50%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--w:50%"></div></div>
+        </div>
+      </div>
+
+      <div class="skill-category reveal reveal-delay-2">
+        <div class="skill-cat-title"><span class="cat-icon">🔌</span> ENGINEERING TOOLS</div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">EPLAN (Wiring Diagrams)</span><span class="skill-pct">45%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--w:45%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">P&ID / Draw.io</span><span class="skill-pct">60%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--w:60%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Python (Dasar)</span><span class="skill-pct">40%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--w:40%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">GitHub / Version Control</span><span class="skill-pct">55%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--w:55%"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <p class="section-label reveal">// 03 — proyek</p>
+    <h2 class="section-title reveal">Yang sudah<br><span style="color:var(--cyan)">dibangun.</span></h2>
+    <div class="section-divider reveal"></div>
+
+    <div class="projects-grid">
+
+      <div class="project-card reveal">
+        <div class="project-num">PROJECT_01 // CAPSTONE</div>
+        <div class="project-title">Automated Beverage Blending & Filling Plant</div>
+        <div class="project-desc">
+          Sistem otomasi plant pencampuran dan pengisian minuman terintegrasi dengan 
+          Cascade PID, ratio control, feedforward, ISA-88 batch sequencing, 
+          SIS/ESD, dan alarm management ISA-18.2.
+        </div>
+        <div class="project-tags">
+          <span class="project-tag">TIA PORTAL</span>
+          <span class="project-tag">CASCADE PID</span>
+          <span class="project-tag">ISA-88</span>
+          <span class="project-tag">HMI/SCADA</span>
+          <span class="project-tag">SAFETY SIS</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal reveal-delay-1">
+        <div class="project-num">PROJECT_02 // SIMULASI</div>
+        <div class="project-title">PLC Sorting & Conveyor System</div>
+        <div class="project-desc">
+          Simulasi sistem sortir dan konveyor menggunakan Factory I/O + TIA Portal. 
+          Logika Ladder untuk deteksi warna, timer, counter, dan kendali motor.
+        </div>
+        <div class="project-tags">
+          <span class="project-tag">FACTORY I/O</span>
+          <span class="project-tag">LADDER LOGIC</span>
+          <span class="project-tag">PLCSIM</span>
+          <span class="project-tag">SIEMENS S7</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal reveal-delay-2">
+        <div class="project-num">PROJECT_03 // TAMBAHKAN</div>
+        <div class="project-title">Proyek Kamu Berikutnya</div>
+        <div class="project-desc">
+          Slot ini menunggu proyek kamu selanjutnya. Setiap skill baru yang kamu 
+          pelajari bisa menjadi sebuah demonstrasi nyata di sini.
+        </div>
+        <div class="project-tags">
+          <span class="project-tag">COMING SOON</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <p class="section-label reveal">// 04 — kontak</p>
+    <h2 class="section-title reveal">Mari <span style="color:var(--cyan)">terhubung.</span></h2>
+    <div class="section-divider reveal"></div>
+    <div class="contact-wrap">
+      <p class="contact-desc reveal">
+        Terbuka untuk peluang kerja, kolaborasi proyek, diskusi teknis, atau 
+        sekadar bertukar pikiran seputar dunia automation engineering.
+      </p>
+      <div class="contact-links">
+        <a href="mailto:email@kamu.com" class="contact-link reveal">
+          <span class="contact-link-icon">✉️</span>
+          <div class="contact-link-info">
+            <div class="contact-link-label">Email</div>
+            <div class="contact-link-value">email@kamu.com</div>
+          </div>
+          <span class="contact-link-arrow">→</span>
+        </a>
+        <a href="https://linkedin.com/in/username-kamu" target="_blank" class="contact-link reveal reveal-delay-1">
+          <span class="contact-link-icon">💼</span>
+          <div class="contact-link-info">
+            <div class="contact-link-label">LinkedIn</div>
+            <div class="contact-link-value">linkedin.com/in/username-kamu</div>
+          </div>
+          <span class="contact-link-arrow">→</span>
+        </a>
+        <a href="https://github.com/username-kamu" target="_blank" class="contact-link reveal reveal-delay-2">
+          <span class="contact-link-icon">🐙</span>
+          <div class="contact-link-info">
+            <div class="contact-link-label">GitHub</div>
+            <div class="contact-link-value">github.com/username-kamu</div>
+          </div>
+          <span class="contact-link-arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p class="copy">© 2025 <span>Tiar Arsy</span> — Automation Engineer</p>
+    <p class="copy">Built with <span>♥</span> · Hosted on GitHub Pages</p>
+  </footer>
+
+  <script>
+    // ── TYPEWRITER ──
+    const phrases = [
+      "PLC & Automation Systems Engineer",
+      "Industrial Control Systems Designer",
+      "HMI / SCADA Developer",
+      "Process Control Enthusiast",
+    ];
+    let pi = 0, ci = 0, deleting = false;
+    const el = document.getElementById("typewriter");
+
+    function type() {
+      const phrase = phrases[pi];
+      if (!deleting) {
+        el.innerHTML = phrase.slice(0, ci + 1) + '<span class="cursor"></span>';
+        ci++;
+        if (ci === phrase.length) { deleting = true; setTimeout(type, 2000); return; }
+        setTimeout(type, 60);
+      } else {
+        el.innerHTML = phrase.slice(0, ci - 1) + '<span class="cursor"></span>';
+        ci--;
+        if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; }
+        setTimeout(type, 35);
+      }
+    }
+    setTimeout(type, 1200);
+
+    // ── SCROLL REVEAL ──
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          // animate skill bars
+          e.target.querySelectorAll('.skill-fill').forEach(f => f.classList.add('active'));
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(r => observer.observe(r));
+
+    // Also observe skill bars that are inside already-visible parents
+    const skillSection = document.getElementById('skills');
+    const skillObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          document.querySelectorAll('.skill-fill').forEach(f => f.classList.add('active'));
+        }
+      });
+    }, { threshold: 0.1 });
+    skillObs.observe(skillSection);
+  </script>
+</body>
+</html>
